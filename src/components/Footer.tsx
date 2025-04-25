@@ -1,9 +1,7 @@
 import React from 'react';
 import cn from 'classnames';
 
-import { Filter } from '../types/Filter';
-
-const FILTER_LINKS: Filter[] = ['All', 'Active', 'Completed'];
+import { Filter, FILTER_LINKS } from '../types/Filter';
 
 interface TodoFooterProps {
   setFilterBy: React.Dispatch<React.SetStateAction<Filter>>;

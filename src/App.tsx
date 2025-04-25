@@ -8,7 +8,7 @@ import { getTodos } from './api/todos';
 import { TodoHeader } from './components/Header';
 import { TodoList } from './components/TodoList';
 import { TodoFooter } from './components/Footer';
-import { Filter } from './types/Filter';
+import { Filter, FILTER_LINKS } from './types/Filter';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
@@ -32,10 +32,10 @@ export const App: React.FC = () => {
   const filteredTodos = useMemo(() => {
     return todos.filter(todo => {
       switch (filterBy) {
-        case 'Active':
+        case Filter.Active:
           return !todo.completed;
 
-        case 'Completed':
+        case Filter.Completed:
           return todo.completed;
 
         default:
