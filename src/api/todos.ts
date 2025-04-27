@@ -9,4 +9,8 @@ export const getTodos = async () => {
   return client.get<Todo[]>(`/todos?userId=${USER_ID}`);
 };
 
+export const createTodo = (data: Omit<Todo, 'id'>) => {
+  return client.post<Todo>('/todos', data);
+};
+
 // Add more methods here

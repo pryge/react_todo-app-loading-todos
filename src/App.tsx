@@ -1,5 +1,3 @@
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable jsx-a11y/control-has-associated-label */
 import React, { useEffect, useMemo, useState } from 'react';
 import cn from 'classnames';
 
@@ -8,12 +6,15 @@ import { getTodos } from './api/todos';
 import { TodoHeader } from './components/Header';
 import { TodoList } from './components/TodoList';
 import { TodoFooter } from './components/Footer';
-import { Filter, FILTER_LINKS } from './types/Filter';
+import { Filter } from './types/Filter';
+import { createTodo } from './api/todos';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [error, setError] = useState('');
-  const [filterBy, setFilterBy] = useState<Filter>('All');
+  const [filterBy, setFilterBy] = useState<Filter>(Filter.All);
+  const [newTodoTitle, setNewTodoTitle] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
 
   useEffect(() => {
     getTodos()
@@ -28,6 +29,35 @@ export const App: React.FC = () => {
     () => todos.reduce((sum, todo) => (!todo.completed ? sum + 1 : sum), 0),
     [todos],
   );
+
+  const handleAdd = async () => {
+    if (newTodoTitle.trim() === '') {
+      setError('Title should not be empty');
+      setTimeout(() => setError(''), 3000);
+
+      return;
+    }
+
+    const trimmedTitle = newTodoTitle.trim();
+
+    setIsAdding(true);
+
+    try {
+      const newTodoFromServer = await createTodo({
+        title: trimmedTitle,
+        userId: 2619,
+        completed: false,
+      });
+
+      setTodos(currentTodos => [...currentTodos, newTodoFromServer]);
+      setNewTodoTitle('');
+    } catch (err) {
+      setError('Unable to add todo');
+      setTimeout(() => setError(''), 3000);
+    } finally {
+      setIsAdding(false);
+    }
+  };
 
   const filteredTodos = useMemo(() => {
     return todos.filter(todo => {
@@ -49,7 +79,12 @@ export const App: React.FC = () => {
       <h1 className="todoapp__title">todos</h1>
 
       <div className="todoapp__content">
-        <TodoHeader />
+        <TodoHeader
+          newTodoTitle={newTodoTitle}
+          setNewTodoTitle={setNewTodoTitle}
+          isAdding={isAdding}
+          onAdd={handleAdd}
+        />
 
         {todos.length !== 0 && <TodoList todos={filteredTodos} />}
 
@@ -62,15 +97,12 @@ export const App: React.FC = () => {
         )}
       </div>
 
-      {/* DON'T use conditional rendering to hide the notification */}
-      {/* Add the 'hidden' class to hide the message smoothly */}
+      {/* Error notification */}
       <div
         data-cy="ErrorNotification"
         className={cn(
           'notification is-danger is-light has-text-weight-normal',
-          {
-            hidden: !error,
-          },
+          { hidden: !error }, // 'hidden' клас буде додано, якщо немає помилки
         )}
       >
         <button
@@ -79,7 +111,6 @@ export const App: React.FC = () => {
           className="delete"
           onClick={() => setError('')}
         />
-        {/* show only one message at a time */}
         {error}
       </div>
     </div>
